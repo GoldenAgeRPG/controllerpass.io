@@ -143,11 +143,21 @@
                     <option value="Missão (Especial)">Missão Especial (800 XP)</option>
                     <option value="Raid">Raid (150 XP/post)</option>
                     <option value="Evento">Evento (1000 XP)</option>
+                    <option value="custom">Personalizado (nome + XP livres)</option>
                 </select>
 
                 <div id="postCountBox" style="display:block;">
                     <label>Nº de Posts</label>
                     <input type="number" id="inpPosts" value="1" min="1">
+                </div>
+
+                <div id="customBox" style="display:none;">
+                    <label>Nome do Tipo</label>
+                    <input type="text" id="inpCustomName" placeholder="Ex: Roleta Y, Evento X...">
+                    <label>XP por Post</label>
+                    <input type="number" id="inpCustomXP" placeholder="Ex: 50" min="1">
+                    <label>Nº de Posts</label>
+                    <input type="number" id="inpCustomPosts" value="1" min="1">
                 </div>
 
                 <label>Link da Comprovação</label>
@@ -228,22 +238,43 @@
         function togglePostInput() {
             const type = document.getElementById('selType').value;
             const box = document.getElementById('postCountBox');
-            box.style.display = XP_DATA[type].variable ? 'block' : 'none';
+            const customBox = document.getElementById('customBox');
+            if (type === 'custom') {
+                box.style.display = 'none';
+                customBox.style.display = 'block';
+            } else {
+                customBox.style.display = 'none';
+                box.style.display = XP_DATA[type].variable ? 'block' : 'none';
+            }
         }
 
         // ADICIONAR ITEM
         function addEntry() {
-            const type = document.getElementById('selType').value;
+            const typeRaw = document.getElementById('selType').value;
             const link = document.getElementById('inpActLink').value.trim();
             let xp = 0;
+            let type = typeRaw;
 
             if(!link) {
                 showToast("É obrigatório inserir o link!", "error");
                 return;
             }
 
-            // Calc XP
-            if(XP_DATA[type].variable) {
+            if (typeRaw === 'custom') {
+                const customName = document.getElementById('inpCustomName').value.trim();
+                const customXP = parseInt(document.getElementById('inpCustomXP').value);
+                const customPosts = parseInt(document.getElementById('inpCustomPosts').value) || 1;
+                if (!customName) {
+                    showToast("Informe o nome do tipo personalizado!", "error");
+                    return;
+                }
+                if (!customXP || customXP < 1) {
+                    showToast("Informe uma quantidade de XP válida!", "error");
+                    return;
+                }
+                type = customName;
+                xp = customXP * customPosts;
+            } else if(XP_DATA[type].variable) {
                 const posts = parseInt(document.getElementById('inpPosts').value) || 1;
                 xp = posts * XP_DATA[type].base;
             } else {
@@ -273,9 +304,11 @@
 
         function commitAdd(data) {
             activities.push(data);
-            // Limpar Inputs
             document.getElementById('inpActLink').value = '';
             document.getElementById('inpPosts').value = '1';
+            document.getElementById('inpCustomName').value = '';
+            document.getElementById('inpCustomXP').value = '';
+            document.getElementById('inpCustomPosts').value = '1';
             updatePreview();
             showToast("Atividade Adicionada!");
         }
