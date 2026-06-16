@@ -118,6 +118,15 @@
 
             <label>Banner URL</label>
             <input type="text" id="inpBanner" placeholder="https://..." oninput="updatePreview()">
+
+            <label>Nome do Passe</label>
+            <input type="text" id="inpPassName" placeholder="Ex: Season 1" oninput="updatePreview()">
+
+            <label>Tipo de Passe</label>
+            <select id="selPassType" onchange="updatePreview()">
+                <option value="Normal">Normal</option>
+                <option value="Permanente">Permanente</option>
+            </select>
             
             <label>Nome do Personagem</label>
             <input type="text" id="inpName" placeholder="Ex: Yuta Okkotsu" oninput="updatePreview()">
@@ -323,6 +332,8 @@
             const name = document.getElementById('inpName').value || 'Nome do Personagem';
             const link = document.getElementById('inpLink').value || '#';
             const banner = document.getElementById('inpBanner').value;
+            const passName = document.getElementById('inpPassName').value || 'Nome do Passe';
+            const passType = document.getElementById('selPassType').value || 'Normal';
 
             // Ordenação: Itens novos embaixo da lista (o array push já faz isso naturalmente)
             // Mas vamos renderizar na ordem do array
@@ -386,6 +397,7 @@
         <div class="sp-user-info">
             <h2>${name}</h2>
             <span><a href="${link}">Ficha de Personagem</a></span>
+            <div class="sp-pass-info" data-name="${passName}" data-type="${passType}" style="margin-top: 5px; font-size: 0.85em; color: #aaa; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">${passName} <span style="color: var(--spc-warning, #ffb300);">[Passe ${passType}]</span></div>
         </div>
         <div class="sp-total-xp">
             <span class="val">${totalXP}</span>
@@ -443,6 +455,8 @@
                 name: document.getElementById('inpName').value,
                 link: document.getElementById('inpLink').value,
                 banner: document.getElementById('inpBanner').value,
+                passName: document.getElementById('inpPassName').value,
+                passType: document.getElementById('selPassType').value,
                 acts: activities
             };
             localStorage.setItem(CACHE_KEY, JSON.stringify(data));
@@ -454,6 +468,8 @@
                 document.getElementById('inpName').value = data.name || '';
                 document.getElementById('inpLink').value = data.link || '';
                 document.getElementById('inpBanner').value = data.banner || '';
+                document.getElementById('inpPassName').value = data.passName || '';
+                document.getElementById('selPassType').value = data.passType || 'Normal';
                 if(data.acts) activities = data.acts;
             }
         }
@@ -483,6 +499,12 @@
                 const bannerStyle = doc.querySelector('.sp-tracker-banner').getAttribute('style');
                 const bannerMatch = bannerStyle.match(/url\(['"]?(.*?)['"]?\)/);
                 if(bannerMatch) document.getElementById('inpBanner').value = bannerMatch[1];
+
+                const passInfo = doc.querySelector('.sp-pass-info');
+                if(passInfo) {
+                    document.getElementById('inpPassName').value = passInfo.getAttribute('data-name') || '';
+                    document.getElementById('selPassType').value = passInfo.getAttribute('data-type') || 'Normal';
+                }
 
                 // Activities
                 activities = [];
